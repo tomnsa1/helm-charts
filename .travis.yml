@@ -1,0 +1,43 @@
+dist: trusty
+sudo: false
+ 
+# Install Helm and Kubeval
+before_install:
+  - wget https://kubernetes-helm.storage.googleapis.com/helm-v2.13.1-linux-amd64.tar.gz
+  - tar xzvf helm-v2.13.1-linux-amd64.tar.gz
+  - mv linux-amd64/helm helm
+  - chmod u+x helm
+  - wget https://github.com/garethr/kubeval/releases/download/0.10.0/kubeval-linux-amd64.tar.gz
+  - tar xzvf kubeval-linux-amd64.tar.gz
+  - chmod u+x kubeval
+  - mv helm kubeval /home/travis/bin/
+  - helm init -c
+ 
+env:
+  # Which K8s version are we going to validate against
+  - KUBERNETES_VERSION="1.10.9"
+ 
+# Run some tests
+script:
+  # Lint Todo App chart syntax
+  - helm lint charts/todo
+  # Validate generated K8s manifests
+  - mkdir manifests
+  - helm template charts/todo --output-dir manifests
+  - find manifests/ -name '*.yaml' | grep -v crd | xargs kubeval -v $KUBERNETES_VERSION
+ 
+# Build Todo App Chart and update Chart Index
+after_success:
+  - mkdir distribution
+  - helm package charts/todo --destination distribution/
+  - helm repo index --url https://tomnsa1.github.io/helm-charts ./distribution/
+ 
+# Publish new Todo App Chart
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep_history: true
+  local_dir: ./distribution
+  on:
+    branch: master
