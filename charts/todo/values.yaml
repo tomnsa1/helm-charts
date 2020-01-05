@@ -4,14 +4,14 @@ todoVersion: "1.0"
 replicas:
   todoApiGateway: 2
   todoCacheIngestion: 1
-  todoCacheService: 1
+  todoCacheService: 2
   todoElastic: 1
   todoPostgres: 1
   todoProxy: 2
   todoRabbitmq: 1
-  todoRedis: 1
-  todoSearchIngestion: 1
-  todoSearchService: 1
+  todoRedis: 2
+  todoSearchIngestion: 2
+  todoSearchService: 2
   todoStorageIngestion: 1
-  todoStorageService: 1
+  todoStorageService: 2
   todoView: 1
